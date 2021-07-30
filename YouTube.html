@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <style>
+      body {
+        background-color: black;
+        color: white;
+        box-sizing: border-box;
+      }
+      #videos-s,
+      #videos-d {
+        width: 90%;
+        margin: 60px auto 0;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        justify-content: center;
+        grid-gap: 2em;
+      }
+      #videos-d {
+        margin-top: 10px;
+      }
+      .heading {
+        grid-area: 1/1/1/-1;
+        font-size: 30px;
+      }
+      .nav {
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 55px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #202020;
+      }
+      .nav img {
+        height: 45px;
+      }
+      .search input {
+        border: 1px solid grey;
+        outline: none;
+        background-color: black;
+        color: white;
+        width: 50vw;
+        padding: 10px;
+      }
+      .fa {
+        border: 1px solid grey;
+        outline: none;
+        background-color: #202020;
+        color: grey;
+        width: 35px;
+        height: 35px;
+        text-align: center;
+        position: absolute;
+        cursor: pointer;
+      }
+      .fa:hover {
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="nav">
+      <div class="logo">
+        <img src="./img/ytlogo.png" alt="" />
+      </div>
+      <div class="search">
+        <input type="text" id="t" placeholder="Search..." />
+        <i onclick="getVideos()" class="fa fa-search"></i>
+      </div>
+      <div class="icons">
+        <img src="./img/ytNav.png" alt="" />
+      </div>
+    </div>
+    <div style="clear: both"></div>
+    <div id="videos-s"></div>
+    <div id="videos-d"></div>
+  </body>
+</html>
+
+<script>
+  async function showVideos() {
+    let video_div = document.getElementById("videos-d");
+    video_div.innerHTML = null;
+
+    let heading = document.createElement("div");
+    heading.setAttribute("class", "heading");
+    heading.innerHTML = `Most popular in india..`;
+    video_div.append(heading);
+
+    let res = await fetch(
+      `https://youtube.googleapis.com/youtube/v3/videos?chart=mostPopular&regionCode=in&part=snippet&key=AIzaSyBv8fRClNH6WjwnakaoekpRMctjA4gyWV8&maxResults=20`
+    );
+    let data = await res.json();
+    // console.log("data:", data);
+
+    let { items } = data;
+
+    items.forEach((el) => {
+      let { id } = el;
+      let {
+        snippet: { title },
+      } = el;
+      if (id != undefined) {
+        let div = document.createElement("div");
+        div.innerHTML = `<iframe width="100%" height="280" src="https://www.youtube.com/embed/${id}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><p>${title}</p>`;
+
+        video_div.append(div);
+      }
+    });
+  }
+  showVideos();
+  async function getVideos() {
+    let search = document.getElementById("t").value;
+
+    let res = await fetch(
+      `https://youtube.googleapis.com/youtube/v3/search?q=${search}&key=AIzaSyBv8fRClNH6WjwnakaoekpRMctjA4gyWV8&part=snippet&maxResults=20`
+    );
+    let data = await res.json();
+    // console.log("data:", data);
+
+    let video_div = document.getElementById("videos-s");
+    video_div.innerHTML = null;
+
+    let heading = document.createElement("div");
+    heading.setAttribute("class", "heading");
+    heading.innerHTML = `Search results for ${search}..`;
+    video_div.append(heading);
+
+    let { items } = data;
+
+    items.forEach((el) => {
+      let {
+        id: { videoId },
+      } = el;
+      let {
+        snippet: { title },
+      } = el;
+      if (videoId != undefined) {
+        let div = document.createElement("div");
+        div.innerHTML = `<iframe width="100%" height="280" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe><p>${title}</p>`;
+        video_div.append(div);
+      }
+    });
+  }
+</script>
